@@ -5325,7 +5325,14 @@ function imageSlotHTML(imagePrompt, imageKey) {
   const shortHint = imagePrompt ? imagePrompt.slice(0, 140) + (imagePrompt.length > 140 ? "…" : "") : "no prompt set";
 
   if (imageKey && IMAGE_ASSETS.has(imageKey)) {
-    const fileSafeKey = imageKey.replace("::", "__");
+    // "::base" is an internal-only marker for non-branching beats/endings —
+    // it was never a real tier name, so it must never appear in an actual
+    // filename. Only genuine branchByTier variants (::thriving/::strained/
+    // ::failing) get the "__" conversion; everything else strips to the
+    // bare beat ID, matching how the image files were actually generated.
+    const fileSafeKey = imageKey.endsWith("::base")
+      ? imageKey.slice(0, -"::base".length)
+      : imageKey.replace("::", "__");
     // onerror calls a named handler (rather than inlining escaped HTML
     // directly in the attribute) so quote characters in the prompt text
     // or placeholder markup can never break out of the attribute string.
